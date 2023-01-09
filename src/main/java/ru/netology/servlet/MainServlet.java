@@ -65,13 +65,7 @@ public class MainServlet extends HttpServlet {
   }
 
   private void check404(long id, HttpServletResponse resp) {
-    int count = 0;
-    for (Post post : repository.posts) {
-      if (post.getId() == id) {
-        count++;
-      }
-    }
-    if (count == 0) {
+    if (!repository.posts.containsKey(id)) {
       resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
     }
   }

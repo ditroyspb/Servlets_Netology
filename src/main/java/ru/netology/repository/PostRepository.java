@@ -2,63 +2,46 @@ package ru.netology.repository;
 
 import ru.netology.model.Post;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 // Stub
 public class PostRepository {
-    int countId = 1;
+    Long countId = 1L;
 
-//    CopyOnWriteArrayList<Post> posts = new CopyOnWriteArrayList<>(); //потокобезопасный, но "тяжелый" вариант
-final public List<Post> posts = new ArrayList<>();
+    //    CopyOnWriteArrayList<Post> posts = new CopyOnWriteArrayList<>(); //потокобезопасный, но "тяжелый" вариант
+//final public List<Post> posts = new ArrayList<>();
+    final public ConcurrentHashMap<Long, Post> posts = new ConcurrentHashMap<>();
 
     public List<Post> all() {
-        synchronized (posts) {
-            if (posts.isEmpty()) {
-                return Collections.emptyList();
-            }
-            return posts;
+        if (posts.isEmpty()) {
+            return Collections.emptyList();
         }
+        return new ArrayList<>(posts.values());
     }
 
     public Optional<Post> getById(long id) {
         Optional<Post> oneOptional = Optional.empty();
-        synchronized (posts) {
-            for (Post post : posts) {
-                if (post.getId() == id) {
-                    oneOptional = Optional.of(post);
-                }
-            }
+        if (posts.containsKey(id)) {
+            oneOptional = Optional.of((Post) posts.get(id));
         }
         return oneOptional;
     }
 
     public Post save(Post post) {
-        synchronized (posts) {
-            if (post.getId() == 0) {
-                post.setId(countId);
-                posts.add(post);
-                countId++;
-            } else {
-                int count = 0;
-                for (Post p : posts) {
-                    if (p.getId() == post.getId()) {
-                        p.setContent(post.getContent());
-                        count++;
-                    }
-                }
-                if (count == 0) {
-                    posts.add(post);
-                }
-            }
-            return post;
+        if (post.getId() == 0) {
+            post.setId(countId);
+            posts.put(countId, post);
+            countId++;
+//            } else if (posts.containsKey(post.getId())) {
+        } else {
+            posts.put(post.getId(), post);
         }
+        return post;
     }
 
     public void removeById(long id) {
-        posts.removeIf(post -> post.getId() == id);
+        posts.remove(id);
     }
 }
