@@ -35,8 +35,6 @@ public class MainServlet extends HttpServlet {
         // easy way
         final var id = findId(path);
 
-        check404(id, resp);
-
         controller.getById(id, resp);
 
         return;
@@ -49,8 +47,6 @@ public class MainServlet extends HttpServlet {
         // easy way
         final var id = findId(path);
 
-        check404(id, resp);
-
         controller.removeById(id, resp);
         return;
       }
@@ -62,12 +58,6 @@ public class MainServlet extends HttpServlet {
 
   private long findId(String path) {
     return Long.parseLong(path.substring(path.lastIndexOf("/") + 1));
-  }
-
-  private void check404(long id, HttpServletResponse resp) {
-    if (!repository.posts.containsKey(id)) {
-      resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
-    }
   }
 }
 
